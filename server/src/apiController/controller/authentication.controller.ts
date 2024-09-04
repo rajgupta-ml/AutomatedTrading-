@@ -8,6 +8,7 @@ import { InvalidUserDetailError } from "../errors/InvalidUserDetails.error";
 import { SuccessResponse } from "../success/Response.success";
 import { responseHandlerForSuccess } from "../response/successHandler.response";
 import { BAD_REQUEST_CODE, SUCCESSFULL_CODE } from "../statusCode/statusCode";
+import { IStorage } from "../typesAndInterfaces/IStorage";
 interface userRegistrationDetail {
     username : string,
     password : string,
@@ -20,9 +21,11 @@ interface userRegistrationDetail {
 export class AuthController {
     // Creating a cipher Manager Instance for encryption and decryption
     private cipherManager : CipherManager
+    private storage : IStorage
 
-    constructor() {
+    constructor(storage : IStorage) {
         this.cipherManager = new CipherManager();
+        this.storage = storage;
     }
 
     async userRegister (request: express.Request, response : express.Response, next : express.NextFunction) {
@@ -47,7 +50,7 @@ export class AuthController {
             }
 
             // Saving the userDetails in the Database
-            await DatabaseManager.insertOne("users", DBUserData);
+            await this.storage.insertOne("users", DBUserData);
         
             // Sending the response
             return responseHandlerForSuccess(response, new SuccessResponse(SUCCESSFULL_CODE, "Database Insert", "Registration Complete successfully"))

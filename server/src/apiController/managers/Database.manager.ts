@@ -3,8 +3,9 @@ import { DatabaseError } from '../errors/Database.error';
 import { PostgresError } from '../typesAndInterfaces/Postgress.types';
 import { UnknownError } from '../errors/Unknown.error';
 import { BAD_REQUEST_CODE, INTERNAL_SERVER_CODE } from '../statusCode/statusCode';
+import { IStorage } from '../typesAndInterfaces/IStorage';
 
-class DatabaseManager {
+class DatabaseManager implements IStorage {
     // Private constructor to prevent instantiation
 
     private readonly user : string | undefined;
@@ -89,7 +90,7 @@ class DatabaseManager {
         }
     }
 
-    public static async insertOne  (tableName : string, dataToBeSaved : Record<string, string>) : Promise<QueryResult<any>> {
+    public async insertOne  (tableName : string, dataToBeSaved : Record<string, string>) : Promise<QueryResult<any>> {
         let result : QueryResult<any>;
         try {      
             const client = DatabaseManager.client;
