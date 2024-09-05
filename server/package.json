@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "npx tsc && node ./dist/main.js",
+    "dev": "npx tsc && node ./dist/apiController/main.js",
     "test" : "jest"
   },
   "author": "",

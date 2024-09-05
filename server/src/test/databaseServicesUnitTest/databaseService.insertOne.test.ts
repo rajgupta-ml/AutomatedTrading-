@@ -1,7 +1,7 @@
-import { Client } from 'pg';
-import DatabaseServices from '../../src/apiController/services/DatabaseHandler.services';
-import { DatabaseError } from '../../src/apiController/errors/Database.error';
-import { UnknownError } from '../../src/apiController/errors/Unknown.error';
+import { Client, DatabaseError } from 'pg';
+import DatabaseServices from '../../apiController/services/DatabaseHandler.services';
+import { UnknownError } from '../../apiController/errors/Unknown.error';
+
 
 
 // Mock the pg Client

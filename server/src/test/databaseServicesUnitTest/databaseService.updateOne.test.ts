@@ -1,6 +1,6 @@
-import { DatabaseError } from "../../src/apiController/errors/Database.error";
-import DatabaseServices from "../../src/apiController/services/DatabaseHandler.services";
 import { Client, QueryResult } from "pg";
+import DatabaseServices from "../../apiController/services/DatabaseHandler.services";
+import { DatabaseError } from "../../apiController/errors/Database.error";
 
 jest.mock('pg', () => {
     const mClient = {

@@ -3,7 +3,7 @@
 import  express, { NextFunction } from "express";
 import { responseHandlerForSuccess } from "../response/successHandler.response";
 import { userRegistrationDetail } from "../interfaces/IUserRegistrationDetails";
-import { UserServices } from "../services/userHandler.services";
+import { UserServices } from "../services/UserHandler.services";
 import { IAuthController } from "../interfaces/IAuthController";
 
 

@@ -45,6 +45,11 @@ export class UserServices implements IUserServices {
 
     }
     userLogin (request: express.Request, response : express.Response){
+        // Data Sanitization 
+        // Check if the user Exist or Not
+        // if Exist compare the hash 
+        // create JWT 
+        // send the SuccessResponse
     }
 
     private validateUserDetails(userDetails : userRegistrationDetail){

@@ -27,10 +27,6 @@ async function startServer() {
         await databaseInstance.connect();
 
         await databaseInstance.createTableIfNotExist();
-    
-
-        const result = await databaseInstance.findOne("users", ["username"], {"userID": "1", "username" : "Raj Gupta"}, ["AND"]);
-        console.log('Query Result:', result.rows);
 
         app.listen(PORT, () => {
             console.log(`The server is running on http://localhost:${PORT}`);
