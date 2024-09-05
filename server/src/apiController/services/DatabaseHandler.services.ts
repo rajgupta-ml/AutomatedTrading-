@@ -13,7 +13,7 @@ class DatabaseServices implements IStorage {
     private readonly password : string | undefined;
     private readonly port : number | undefined;
     private static instance : DatabaseServices | null= null
-    private static client : Client | null = null;
+    public static client : Client | null = null;
     private constructor() {
         // Initialization The database Details
         this.user = process.env.PG_USER ;
@@ -48,7 +48,7 @@ class DatabaseServices implements IStorage {
         const client = this.getClient();
         try {
             await client.connect();
-            await this.createTableIfNotExist();
+            // await this.createTableIfNotExist();
             console.log('Connected to the database successfully.');
         } catch (err) {
             console.log(err);
@@ -93,7 +93,7 @@ class DatabaseServices implements IStorage {
         let result : QueryResult<any>;
         try {      
             const client = DatabaseServices.client;
-            if(!client) throw new DatabaseError("Internal Server Error", INTERNAL_SERVER_CODE, "Could not connect to the DB");
+            if(client === null) throw new DatabaseError("Internal Server Error", INTERNAL_SERVER_CODE, "Could not connect to the DB");
             //Table name and object    
             const keys : string[] = [];
             const values : string[] = [];
@@ -108,13 +108,64 @@ class DatabaseServices implements IStorage {
             const query = `INSERT INTO ${tableName}(${stringKeys}) VALUES (${placeholders.join(",")}) RETURNING *`;
             result = await client.query(query, values);
         } catch (error) {
-
             if(error instanceof Error && 'code' in error){
 
                 throw new DatabaseError (error.message, BAD_REQUEST_CODE, "BAD REQUEST (Could Not Insert The data)");
             }
+            if (error instanceof DatabaseError) {
+                throw error;
+            }
+                throw new UnknownError("Internal Server Error");
+            
+        }
+        return result;
+    }
+
+    public async updateOne (
+        tableName: string, 
+        updateColumn: string, 
+        updateValue: string, 
+        conditionColumnAndValues: Record<string, string>, 
+        LogicalOperator?: Array<string>
+    ): Promise<QueryResult<any>>
+    {
+        let result: QueryResult<any>;
+
+        try {
+            const client = DatabaseServices.client;
+            console.log(client)
+            if (!client) throw new DatabaseError("Internal Server Error", INTERNAL_SERVER_CODE, "Could not connect to the DB");
+
+            // Creating condition query with placeholders to avoid SQL injection
+            const conditionEntries = Object.entries(conditionColumnAndValues);
+            const conditions = conditionEntries.map(([key, value], index) => {
+                const logicalOp = LogicalOperator && LogicalOperator[index] ? LogicalOperator[index] : 'AND';
+                return `${key} = $${index + 2} ${index < conditionEntries.length - 1 ? logicalOp : ''}`;  // $ placeholders
+            }).join(' ');
+
+            // Constructing the query with parameterized values
+            const updateQuery = `
+                UPDATE ${tableName}
+                SET ${updateColumn} = $1
+                WHERE ${conditions}`;
+
+            // Gathering values for the query
+            const values = [updateValue, ...conditionEntries.map(([_, value]) => value)];
+            console.log(updateQuery);
+            console.log(values);
+            // Execute the query
+            result = await client.query(updateQuery, values); // Parameterized query execution
+
+        } catch (error) {
+            if (error instanceof Error && 'code' in error) {
+                throw new DatabaseError(error.message, BAD_REQUEST_CODE, "BAD REQUEST (Could Not Update the Data)");
+            }
+            if (error instanceof DatabaseError) {
+                throw error;
+            }
             throw new UnknownError("Internal Server Error");
         }
+
         return result;
     }
 
