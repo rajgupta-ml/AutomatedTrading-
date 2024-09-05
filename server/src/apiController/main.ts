@@ -23,6 +23,7 @@ async function startServer() {
     try {
         const databaseInstance = DatabaseServices.getInstance();
         await databaseInstance.connect();
+        await databaseInstance.createTableIfNotExist();
         console.log('Database connected successfully');
         
         app.listen(PORT, () => {

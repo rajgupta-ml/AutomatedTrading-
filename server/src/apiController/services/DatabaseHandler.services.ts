@@ -69,7 +69,7 @@ class DatabaseServices implements IStorage {
         }
     }
 
-    private async createTableIfNotExist () {
+    public async createTableIfNotExist () {
         try {
             const client = DatabaseServices.client;
             if(!client) throw new DatabaseError("Internal Server Error", INTERNAL_SERVER_CODE, "Could not connect to the DB");
