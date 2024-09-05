@@ -2,7 +2,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 import express from "express";
 import v1Router  from "./router/v1";
-import DatabaseManager from "./managers/Database.manager";
+import DatabaseManager from "./services/DatabaseHandler.services";
 import { errorHandler } from "./middleware/errorHandler.middleware";
 const app = express();
 const PORT = process.env.PORT || 8080;

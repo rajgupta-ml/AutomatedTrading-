@@ -1,7 +1,7 @@
 import { AuthController } from "../controller/authentication.controller";
-import DatabaseManager from "../managers/Database.manager";
-import CipherManager from "../services/services.cipherHandler";
-import { UserServices } from "../services/services.userServices";
+import DatabaseManager from "../services/DatabaseHandler.services";
+import CipherManager from "../services/cipherHandler.services";
+import { UserServices } from "../services/userHandler.services";
 
 const databaseInstance = DatabaseManager.getInstance();
 const cipherInstance = new CipherManager();
