@@ -1,11 +1,10 @@
 import { Client, QueryResult } from 'pg';
 import { DatabaseError } from '../errors/Database.error';
-import { PostgresError } from '../interfaces/IPostgresError';
 import { UnknownError } from '../errors/Unknown.error';
 import { BAD_REQUEST_CODE, INTERNAL_SERVER_CODE } from '../statusCode/statusCode';
 import { IStorage } from '../interfaces/IStorage';
 
-class DatabaseManager implements IStorage {
+class DatabaseServices implements IStorage {
     // Private constructor to prevent instantiation
 
     private readonly user : string | undefined;
@@ -13,7 +12,7 @@ class DatabaseManager implements IStorage {
     private readonly database : string | undefined;
     private readonly password : string | undefined;
     private readonly port : number | undefined;
-    private static instance : DatabaseManager | null= null
+    private static instance : DatabaseServices | null= null
     private static client : Client | null = null;
     private constructor() {
         // Initialization The database Details
@@ -24,16 +23,16 @@ class DatabaseManager implements IStorage {
     }
 
 
-    public static getInstance() :DatabaseManager {
-        if(!DatabaseManager.instance) {
-            DatabaseManager.instance = new DatabaseManager();
+    public static getInstance() :DatabaseServices {
+        if(!DatabaseServices.instance) {
+            DatabaseServices.instance = new DatabaseServices();
         }
-        return DatabaseManager.instance;
+        return DatabaseServices.instance;
     }
 
     private getClient() : Client{
-        if(!DatabaseManager.client){
-            DatabaseManager.client = new Client({
+        if(!DatabaseServices.client){
+            DatabaseServices.client = new Client({
                 user : this.user,
                 host : this.host,
                 database : this.database,
@@ -42,7 +41,7 @@ class DatabaseManager implements IStorage {
                 
             })
         }
-        return DatabaseManager.client;
+        return DatabaseServices.client;
     }
 
     public async connect(): Promise<void> {
@@ -59,11 +58,11 @@ class DatabaseManager implements IStorage {
 
     public async disconnect(): Promise<void> {
         try {
-            const client = DatabaseManager.client;
+            const client = DatabaseServices.client;
 
             if(!client) throw new DatabaseError("Internal Server Error", INTERNAL_SERVER_CODE, "Could not connect to the DB");
             await client.end();
-            DatabaseManager.client = null;
+            DatabaseServices.client = null;
             console.log('Disconnected from the database successfully.');
         } catch (err) {
            throw new DatabaseError("Internal Server Error", INTERNAL_SERVER_CODE, "Disconnect Unsuccessful");
@@ -72,7 +71,7 @@ class DatabaseManager implements IStorage {
 
     private async createTableIfNotExist () {
         try {
-            const client = DatabaseManager.client;
+            const client = DatabaseServices.client;
             if(!client) throw new DatabaseError("Internal Server Error", INTERNAL_SERVER_CODE, "Could not connect to the DB");
             const createTableQuery = `
                 CREATE TABLE IF NOT EXISTS users (
@@ -93,7 +92,7 @@ class DatabaseManager implements IStorage {
     public async insertOne  (tableName : string, dataToBeSaved : Record<string, string>) : Promise<QueryResult<any>> {
         let result : QueryResult<any>;
         try {      
-            const client = DatabaseManager.client;
+            const client = DatabaseServices.client;
             if(!client) throw new DatabaseError("Internal Server Error", INTERNAL_SERVER_CODE, "Could not connect to the DB");
             //Table name and object    
             const keys : string[] = [];
@@ -122,4 +121,4 @@ class DatabaseManager implements IStorage {
 
 }
 
-export default DatabaseManager;
+export default DatabaseServices;

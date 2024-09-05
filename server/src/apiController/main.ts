@@ -2,7 +2,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 import express from "express";
 import v1Router  from "./router/v1";
-import DatabaseManager from "./services/DatabaseHandler.services";
+import DatabaseServices from "./services/DatabaseHandler.services";
 import { errorHandler } from "./middleware/errorHandler.middleware";
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -18,9 +18,21 @@ app.use(errorHandler);
 app.get("/test", (req, res) => {
     res.send("server is working")
 })
-app.listen(PORT, async () => {
-    console.log(`The server is running on http://localhost:${PORT}`);
-    const databaseInstance = DatabaseManager.getInstance();
-    await databaseInstance.connect()
-})
+// Function to initialize both the server and the database
+async function startServer() {
+    try {
+        const databaseInstance = DatabaseServices.getInstance();
+        await databaseInstance.connect();
+        console.log('Database connected successfully');
+        
+        app.listen(PORT, () => {
+            console.log(`The server is running on http://localhost:${PORT}`);
+        });
+    } catch (error) {
+        console.error('Failed to start the server:', error);
+        process.exit(1); // Exit the process with an error code
+    }
+}
 
+// Start the server
+startServer();
