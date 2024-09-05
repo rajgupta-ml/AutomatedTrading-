@@ -208,6 +208,76 @@ class DatabaseServices implements IStorage {
         }
     }
 
+    public async deleteOne(
+        tableName: string,
+        conditionColumnAndValues: Record<string, string>,
+        LogicalOperator?: Array<string>
+    ): Promise<QueryResult<any>> {
+        let result: QueryResult<any>;
+
+        try {
+            const client = DatabaseServices.client;
+            if (!client) throw new DatabaseError("Internal Server Error", INTERNAL_SERVER_CODE, "Could not connect to the DB");
+
+            // Creating condition query with placeholders to avoid SQL injection
+            const conditionEntries = Object.entries(conditionColumnAndValues);
+            const conditions = conditionEntries.map(([key, value], index) => {
+                const logicalOp = LogicalOperator && LogicalOperator[index] ? LogicalOperator[index] : 'AND';
+                return `${key} = $${index + 1} ${index < conditionEntries.length - 1 ? logicalOp : ''}`;  // $ placeholders
+            }).join(' ');
+
+            // Constructing the query with parameterized values
+            const deleteQuery = `
+                DELETE FROM ${tableName}
+                WHERE ${conditions}`;
+
+            // Gathering values for the query
+            const values = conditionEntries.map(([_, value]) => value);
+
+            // Execute the query
+            result = await client.query(deleteQuery, values);
+
+            // Check if any row was deleted
+            if (result.rowCount === 0) {
+                throw new DatabaseError("No rows deleted", BAD_REQUEST_CODE, "No record found matching the condition");
+            }
+
+        } catch (error) {
+            if (error instanceof Error && 'code' in error) {
+                throw new DatabaseError(error.message, BAD_REQUEST_CODE, "BAD REQUEST (Could Not Delete The Data)");
+            }
+            if (error instanceof DatabaseError) {
+                throw error;
+            }
+            throw new UnknownError("Internal Server Error");
+        }
+
+        return result;
+    }
+    
+    public async executeRawSQL(query: string, values?: any[]): Promise<QueryResult<any>> {
+        let result: QueryResult<any>;
+
+        try {
+            const client = DatabaseServices.client;
+            if (!client) throw new DatabaseError("Internal Server Error", INTERNAL_SERVER_CODE, "Could not connect to the DB");
+
+            // Execute the raw SQL query
+            result = await client.query(query, values);
+
+        } catch (error) {
+            if (error instanceof Error && 'code' in error) {
+                throw new DatabaseError(error.message, INTERNAL_SERVER_CODE, "Error executing raw SQL");
+            }
+            if (error instanceof DatabaseError) {
+                throw error;
+            }
+            throw new UnknownError("Internal Server Error");
+        }
+
+        return result;
+    }
+
     }
 
 
