@@ -1,5 +1,5 @@
 import express from 'express';
-import { ErrorAndSuccessInterface } from '../typesAndInterfaces/errorAndSuccess.interface';
+import { ErrorAndSuccessInterface } from '../interfaces/IErrorAndSuccess';
 
 export const responseHandlerForError = (response : express.Response, error : ErrorAndSuccessInterface ) => {
     const errorStructure = {

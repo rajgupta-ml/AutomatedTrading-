@@ -1,5 +1,5 @@
 import  express from "express";
-import { ErrorAndSuccessInterface } from "../typesAndInterfaces/errorAndSuccess.interface";
+import { ErrorAndSuccessInterface } from "../interfaces/IErrorAndSuccess";
 import { responseHandlerForError } from "../response/errorHandler.response";
 import { INTERNAL_SERVER_CODE } from "../statusCode/statusCode";
 

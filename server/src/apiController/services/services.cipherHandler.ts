@@ -1,7 +1,8 @@
 import crypto from "crypto";
 import { Buffer } from "buffer";
+import { ICipher } from "../interfaces/ICipher";
 
-class CipherManager {
+class CipherManager implements ICipher{
     private readonly algorithm: "aes-256-ccm"
     private readonly keyLength: number
     private readonly ivLength: number

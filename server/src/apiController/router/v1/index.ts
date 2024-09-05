@@ -1,10 +1,7 @@
 import express from "express";
-import { AuthController } from "../../controller/authentication.controller";
-import DatabaseManager from "../../managers/Database.manager";
+import { authenticationController } from "../../di/authcontroller.di";
 const v1Router = express.Router();
 
-const databaseInstance = DatabaseManager.getInstance();
-const authenticationController = new AuthController(databaseInstance);
 v1Router.post("/register", authenticationController.userRegister.bind(authenticationController));
 
 

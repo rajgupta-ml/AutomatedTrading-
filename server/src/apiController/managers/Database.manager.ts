@@ -1,9 +1,9 @@
 import { Client, QueryResult } from 'pg';
 import { DatabaseError } from '../errors/Database.error';
-import { PostgresError } from '../typesAndInterfaces/Postgress.types';
+import { PostgresError } from '../interfaces/IPostgresError';
 import { UnknownError } from '../errors/Unknown.error';
 import { BAD_REQUEST_CODE, INTERNAL_SERVER_CODE } from '../statusCode/statusCode';
-import { IStorage } from '../typesAndInterfaces/IStorage';
+import { IStorage } from '../interfaces/IStorage';
 
 class DatabaseManager implements IStorage {
     // Private constructor to prevent instantiation

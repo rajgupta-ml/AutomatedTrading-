@@ -1,4 +1,4 @@
-import { ErrorAndSuccessInterface } from "../typesAndInterfaces/errorAndSuccess.interface";
+import { ErrorAndSuccessInterface } from "../interfaces/IErrorAndSuccess";
 
 export class UnknownError extends Error implements ErrorAndSuccessInterface {
 
