@@ -169,7 +169,47 @@ class DatabaseServices implements IStorage {
         return result;
     }
 
+    public async findOne(
+        tableName: string,
+        columnSeleted?: Array<string>,
+        condition?: Record<string, string>,
+        logical?: Array<string>
+    ): Promise<QueryResult<any>> {
 
-}
+        // Constructing column selection
+        let columnSelectionQuery = columnSeleted ? columnSeleted.join(",") : "*";
+        
+        // Constructing condition query
+        let conditionQuery = "";
+        if (condition) {
+            conditionQuery = Object.entries(condition).map(([key, value], index) => {
+                const logicalOp = logical && logical[index] ? logical[index] : 'AND';
+                return `${key} = $${index + 1} ${index < Object.entries(condition).length - 1 ? logicalOp : ''}`;
+            }).join(' ');
+        }
+
+        // Final query string
+        const findQuery = `SELECT ${columnSelectionQuery} FROM ${tableName} ${conditionQuery ? `WHERE ${conditionQuery}` : ""}`;
+        console.log(findQuery);
+
+        // Executing the query
+        try {
+            const client = DatabaseServices.client;
+            if (!client) {
+                throw new DatabaseError("Internal Server Error", INTERNAL_SERVER_CODE, "Could not connect to the DB");
+            }
+            const values = Object.values(condition || {});
+            return await client.query(findQuery, values);
+        } catch (error) {
+            if (error instanceof Error && 'code' in error) {
+                throw new DatabaseError(error.message, BAD_REQUEST_CODE, "BAD REQUEST (Could Not Find the Data)");
+            }
+            throw new UnknownError("Internal Server Error");
+        }
+    }
+
+    }
+
+
 
 export default DatabaseServices;

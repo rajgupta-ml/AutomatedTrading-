@@ -21,11 +21,17 @@ app.get("/test", (req, res) => {
 // Function to initialize both the server and the database
 async function startServer() {
     try {
+        console.log('Starting server...');
         const databaseInstance = DatabaseServices.getInstance();
+
         await databaseInstance.connect();
+
         await databaseInstance.createTableIfNotExist();
-        console.log('Database connected successfully');
-        
+    
+
+        const result = await databaseInstance.findOne("users", ["username"], {"userID": "1", "username" : "Raj Gupta"}, ["AND"]);
+        console.log('Query Result:', result.rows);
+
         app.listen(PORT, () => {
             console.log(`The server is running on http://localhost:${PORT}`);
         });
@@ -37,3 +43,4 @@ async function startServer() {
 
 // Start the server
 startServer();
+
