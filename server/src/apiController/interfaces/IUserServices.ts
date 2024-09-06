@@ -1,5 +1,6 @@
 import { SuccessResponse } from "../success/Response.success";
-import { userRegistrationDetail } from "./IUserRegistrationDetails";
+import { userRegistrationDetail } from "./IAuthController";
+
 
 export interface IUserServices {
     userRegister (userDetails : userRegistrationDetail) : Promise<SuccessResponse>

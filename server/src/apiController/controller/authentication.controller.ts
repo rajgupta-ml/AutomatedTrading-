@@ -2,9 +2,8 @@
 
 import  express, { NextFunction } from "express";
 import { responseHandlerForSuccess } from "../response/successHandler.response";
-import { userRegistrationDetail } from "../interfaces/IUserRegistrationDetails";
 import { UserServices } from "../services/UserHandler.services";
-import { IAuthController } from "../interfaces/IAuthController";
+import { IAuthController, IUserLogin, userRegistrationDetail } from "../interfaces/IAuthController";
 
 
 
@@ -30,6 +29,18 @@ export class AuthController implements IAuthController {
 
     }
     async userLogin (request: express.Request, response : express.Response, next : NextFunction) : Promise <void>{
+
+        try {
+            const userDetails : IUserLogin = {...request.body};
+
+            // Handling the Authentication 
+            const result = await this.userServices.userLogin(userDetails);
+
+            //sending the response
+            return responseHandlerForSuccess(response, result);
+        } catch (error) {
+            next(error);
+        }
     }
     
 }
