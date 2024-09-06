@@ -29,7 +29,7 @@ class DatabaseServices implements IStorage {
         }
         return DatabaseServices.instance;
     }
-
+    
     private getClient() : Client{
         if(!DatabaseServices.client){
             DatabaseServices.client = new Client({
@@ -51,7 +51,6 @@ class DatabaseServices implements IStorage {
             // await this.createTableIfNotExist();
             console.log('Connected to the database successfully.');
         } catch (err) {
-            console.log(err);
             throw new DatabaseError("Internal Server Error", INTERNAL_SERVER_CODE, "Could not connect to the DB");
         }
     }
@@ -93,7 +92,7 @@ class DatabaseServices implements IStorage {
         let result : QueryResult<any>;
         try {      
             const client = DatabaseServices.client;
-            if(client === null) throw new DatabaseError("Internal Server Error", INTERNAL_SERVER_CODE, "Could not connect to the DB");
+            if(!client) throw new DatabaseError("Internal Server Error", INTERNAL_SERVER_CODE, "Could not connect to the DB");
             //Table name and object    
             const keys : string[] = [];
             const values : string[] = [];
@@ -133,7 +132,6 @@ class DatabaseServices implements IStorage {
 
         try {
             const client = DatabaseServices.client;
-            console.log(client)
             if (!client) throw new DatabaseError("Internal Server Error", INTERNAL_SERVER_CODE, "Could not connect to the DB");
 
             // Creating condition query with placeholders to avoid SQL injection
@@ -151,8 +149,6 @@ class DatabaseServices implements IStorage {
 
             // Gathering values for the query
             const values = [updateValue, ...conditionEntries.map(([_, value]) => value)];
-            console.log(updateQuery);
-            console.log(values);
             // Execute the query
             result = await client.query(updateQuery, values); // Parameterized query execution
 
@@ -190,7 +186,6 @@ class DatabaseServices implements IStorage {
 
         // Final query string
         const findQuery = `SELECT ${columnSelectionQuery} FROM ${tableName} ${conditionQuery ? `WHERE ${conditionQuery}` : ""}`;
-        console.log(findQuery);
 
         // Executing the query
         try {

@@ -8,7 +8,7 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 app.use(express.json());
 
-
+// handle ddata sanitization here using a middleware
 app.use("/api/v1", v1Router);
 
 

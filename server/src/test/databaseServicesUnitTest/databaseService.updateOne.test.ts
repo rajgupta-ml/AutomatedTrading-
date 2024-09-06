@@ -84,7 +84,6 @@ describe("Database Update One testing", () => {
             try {
                 await dbServices.updateOne(tableName, updateColumn, updateValue, condition, LogicalOperator);
             } catch (error) {
-                console.error("Caught error:", error);
                 expect(error).toBeInstanceOf(DatabaseError);
             }
 

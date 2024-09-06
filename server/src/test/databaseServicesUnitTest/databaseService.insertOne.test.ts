@@ -92,7 +92,7 @@ describe('DatabaseServices', () => {
 		// Act & Assert
 		await expect(databaseServices.insertOne(tableName, dataToBeSaved))
 			.rejects
-			.toThrow(UnknownError);
+			.toThrow(DatabaseError);
 
 		// Ensure the `query` method is not called
 		expect(mockClient.query).not.toHaveBeenCalled();
