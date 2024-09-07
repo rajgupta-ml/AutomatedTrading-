@@ -2,7 +2,7 @@ import crypto from "crypto";
 import { Buffer } from "buffer";
 import { ICipher } from "../interfaces/ICipher";
 import { CipherError } from "../errors/Cipher.error";
-import { INTERNAL_SERVER_CODE } from "../statusCode/statusCode";
+import { BAD_REQUEST_CODE, INTERNAL_SERVER_CODE } from "../statusCode/statusCode";
 
 class CipherManager implements ICipher{
     private readonly algorithm: "aes-256-ccm"
@@ -22,6 +22,7 @@ class CipherManager implements ICipher{
 
     async encrypt(password: string): Promise<string> {
         try {
+            if(!password) throw new CipherError("Password can't be empty", BAD_REQUEST_CODE, "1001");
             const salt = crypto.randomBytes(this.saltLength);
             const key = await this.deriveKey(password, salt);
             const iv = crypto.randomBytes(this.ivLength);
@@ -29,17 +30,18 @@ class CipherManager implements ICipher{
             
             const encrypted = Buffer.concat([cipher.update(password, 'utf8'), cipher.final()]);
             const tag = cipher.getAuthTag();
-    
-            return Buffer.concat([salt, iv, tag, encrypted]).toString('base64');
+            const result = Buffer.concat([salt, iv, tag, encrypted]).toString('base64');
+            return result;
             
         } catch (error) {
+            if(error instanceof CipherError) throw error;
             throw new CipherError((error as Error).message, INTERNAL_SERVER_CODE, "1002");
         }
     }
 
     async decrypt(encryptedData: string, password: string): Promise<string> {
         try {
-            
+            if(!encryptedData || !password) throw new CipherError("Data is required", BAD_REQUEST_CODE, "1003");
             const buffer = Buffer.from(encryptedData, 'base64');
             const salt = buffer.subarray(0, this.saltLength);
             const iv = buffer.subarray(this.saltLength, this.saltLength + this.ivLength);
@@ -52,6 +54,7 @@ class CipherManager implements ICipher{
     
             return decipher.update(encrypted) + decipher.final('utf8');
         } catch (error) {
+            if(error instanceof CipherError) throw error
             throw new CipherError((error as Error).message, INTERNAL_SERVER_CODE, "1003");
         }
     }
@@ -67,8 +70,10 @@ class CipherManager implements ICipher{
 
     hash(data: string): string {
             try {
+                if(!data) throw new CipherError("data is required to be hashed", BAD_REQUEST_CODE, "1005")
                 return crypto.createHash('sha256').update(data).digest('hex');
             } catch (error) {
+                if(error instanceof CipherError) throw error;
                 throw new CipherError((error as Error).message, INTERNAL_SERVER_CODE, "1005");
             }
     }
@@ -76,6 +81,7 @@ class CipherManager implements ICipher{
     compareHash(password: string, hashedPassword: string): boolean {
 
         try {
+            if(!password || !hashedPassword) throw new CipherError("data is required to be hashed", BAD_REQUEST_CODE, "1005")
             const hashedInput = this.hash(password);
             return crypto.timingSafeEqual(Buffer.from(hashedInput), Buffer.from(hashedPassword));
         } catch (error) {

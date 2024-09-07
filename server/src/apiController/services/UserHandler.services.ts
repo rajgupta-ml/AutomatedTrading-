@@ -1,7 +1,5 @@
 import { ICipher } from "../interfaces/ICipher";
 import { IStorage } from "../interfaces/IStorage";
-import express from "express";
-
 import { SuccessResponse } from "../success/Response.success";
 import { BAD_REQUEST_CODE, SUCCESSFULL_CODE, UNAUTHORIZED_STATUS_CODE } from "../statusCode/statusCode";
 import { InvalidUserDetailError } from "../errors/InvalidUserDetails.error";
@@ -25,28 +23,39 @@ export class UserServices implements IUserServices {
     }
 
         async userRegister (userDetails : userRegistrationDetail) : Promise<SuccessResponse> {
+
+
+            try {
+                //Validating the required field
+                this.validateUserDetails(userDetails as userRegistrationDetail);    
+    
+                // hashing the password 
+                const hashedPassword = this.cipher.hash(userDetails.password as string);
+    
+    
+                //Encrypting the api details
+                // const encryptedDetails = await this.encryptSensitiveDetails(userDetails);
                 
-            //Validating the required field
-            this.validateUserDetails(userDetails as userRegistrationDetail);    
-
-            // hashing the password 
-            const hashedPassword = this.cipher.hash(userDetails.password as string);
-
-
-            //Encrypting the api details
-            // const encryptedDetails = await this.encryptSensitiveDetails(userDetails);
+                //Create the userData which needs to saved to the DB 
+                const DBUserData = {
+                    username : userDetails.username,
+                    password : hashedPassword,
+                }
+    
+                // Saving the userDetails in the Database
+                await this.storage.insertOne("users", DBUserData);
             
-            //Create the userData which needs to saved to the DB 
-            const DBUserData = {
-                username : userDetails.username,
-                password : hashedPassword,
+                // Returning a Success Response
+                return new SuccessResponse(SUCCESSFULL_CODE, "Database Insert", "Registration Complete successfully")
+                
+            } catch (error) {
+                if(error instanceof InvalidUserDetailError || error instanceof UnknownError){
+                    throw error
+                }
+                console.error(error) // Changes this to a logger
+                throw new InternalServerError("Internal Server Error");
             }
-
-            // Saving the userDetails in the Database
-            await this.storage.insertOne("users", DBUserData);
-        
-            // Returning a Success Response
-            return new SuccessResponse(SUCCESSFULL_CODE, "Database Insert", "Registration Complete successfully")
+                
 
      
 

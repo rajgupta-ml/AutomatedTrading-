@@ -64,12 +64,8 @@ export class TokenizationServices{
              }) as JwtPayload
  
              const ExpirationTime = payload.exp as number;
-             console.log(`ExpTime : ${ExpirationTime}`);
              const nowInSeconds = Math.floor(Date.now() / 1000);
-             console.log(`NowInSeconds : ${nowInSeconds}`);
              const timeLeftToExpire = ExpirationTime - nowInSeconds;
-             console.log(`timeLeftToExpire : ${timeLeftToExpire}`);
-             console.log(`flag : ${timeLeftToExpire <= this.refreshThreshold}`);
              if(timeLeftToExpire <= this.refreshThreshold){
                  const newToken = this.getToken(payload.username);
                  return {tokenVerified : true, newToken};
