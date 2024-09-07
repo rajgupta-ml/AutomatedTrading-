@@ -77,13 +77,12 @@ class DatabaseServices implements IStorage {
                     userID SERIAL PRIMARY KEY,
                     username VARCHAR(50) NOT NULL UNIQUE,
                     password VARCHAR(255) NOT NULL,
-                    redirectURI VARCHAR(255) NOT NULL,
-                    clientID VARCHAR(255) NOT NULL,
-                    clientSecret VARCHAR(255) NOT NULL
+                    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
             `;
             await client.query(createTableQuery);
         } catch (error) {
+            console.log(error);
            throw new DatabaseError("Internal Server Error", INTERNAL_SERVER_CODE, "Table Creation Unsuccesfull");
         }
     }

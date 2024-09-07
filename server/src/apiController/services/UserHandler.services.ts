@@ -34,13 +34,12 @@ export class UserServices implements IUserServices {
 
 
             //Encrypting the api details
-            const encryptedDetails = await this.encryptSensitiveDetails(userDetails);
+            // const encryptedDetails = await this.encryptSensitiveDetails(userDetails);
             
             //Create the userData which needs to saved to the DB 
             const DBUserData = {
                 username : userDetails.username,
                 password : hashedPassword,
-                ...encryptedDetails
             }
 
             // Saving the userDetails in the Database
@@ -80,7 +79,7 @@ export class UserServices implements IUserServices {
     }
 
     private validateUserDetails(userDetails : userRegistrationDetail){
-        const requiredFields = ["username", "password", "redirectURI" ,"clientId", "clientSecret"];
+        const requiredFields = ["username", "password"];
         for(const requiredField of requiredFields){
             if(!userDetails[requiredField as keyof userRegistrationDetail]) throw new InvalidUserDetailError(`${requiredField} is required`, BAD_REQUEST_CODE, "BAD REQUEST");
         }
