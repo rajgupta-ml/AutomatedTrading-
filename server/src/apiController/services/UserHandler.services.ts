@@ -93,16 +93,4 @@ export class UserServices implements IUserServices {
             if(!userDetails[requiredField as keyof userRegistrationDetail]) throw new InvalidUserDetailError(`${requiredField} is required`, BAD_REQUEST_CODE, "BAD REQUEST");
         }
     }
-
-
-    private  async encryptSensitiveDetails(userDetails : userRegistrationDetail): Promise<Record<string, string>>  {
-
-        const sensitiveField = ["redirectURI" ,"clientId", "clientSecret"];
-        const encryptedDetails: Record<string, string> = {};
-        for(const field of sensitiveField){
-            encryptedDetails[field] = await this.cipher.encrypt(
-                userDetails[field as keyof userRegistrationDetail] as string)
-            }
-        return encryptedDetails;
-    }
 }
