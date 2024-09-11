@@ -43,8 +43,7 @@ describe("Tokenization Service Testing", () => {
 
         it("should verify and return the same token if not near expiration", () => {
             const token = tokenizer.getToken("Raj Gupta");
-            const { tokenVerified, newToken } = tokenizer.verifyAndRefreshToken(token);
-            expect(tokenVerified).toBe(true);
+            const { newToken } = tokenizer.verifyAndRefreshToken(token);
             expect(newToken).toBeUndefined();
         });
 

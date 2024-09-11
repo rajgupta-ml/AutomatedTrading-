@@ -1,9 +1,8 @@
-import { Client, QueryResult } from "pg";
-import DatabaseServices from "../services/DatabaseHandler.services";
+import { QueryResult } from "pg";
 
 export interface IStorage {
 
-    insertOne(tableName : string, dataToBeSaved : Record<string, string>) : Promise<QueryResult>
+    insertOne(tableName : string, dataToBeSaved : Record<string, any>) : Promise<QueryResult>
     updateOne (
         tableName: string, 
         updateColumn: string, 

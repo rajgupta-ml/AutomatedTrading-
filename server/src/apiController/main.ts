@@ -2,12 +2,13 @@ import dotenv from 'dotenv'
 dotenv.config()
 import express from "express";
 import v1Router  from "./router/v1";
+import cookieParser from "cookie-parser"
 import DatabaseServices from "./services/DatabaseHandler.services";
 import { errorHandler } from "./middleware/errorHandler.middleware";
 const app = express();
 const PORT = process.env.PORT || 8080;
+app.use(cookieParser())
 app.use(express.json());
-
 // handle ddata sanitization here using a middleware
 app.use("/api/v1", v1Router);
 

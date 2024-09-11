@@ -1,7 +1,16 @@
 import express from 'express';
-import { SuccessResponse } from '../success/Response.success';
+import { Response } from '../success/Response.success';
+import { UnauthorizedUser } from '../errors/UnauthorizedUser.error';
 
-export const responseHandlerForSuccess = (response : express.Response , success: SuccessResponse) => {
+export const responseHandlerForSuccess = (response : express.Response , success: Response | UnauthorizedUser) => {
+    if(success.data?.token){
+        response.cookie("set-cookie", success.data?.token, {
+            httpOnly : false,
+            sameSite : "none",
+            secure : false,
+            maxAge : 24 * 60 * 60 * 1000,
+        })
+    }
     response.status(success.statusCode).json({
         success : success.success,
         statusCode : success.statusCode,
@@ -11,3 +20,6 @@ export const responseHandlerForSuccess = (response : express.Response , success:
         data : success.data,
     });
 }
+
+
+

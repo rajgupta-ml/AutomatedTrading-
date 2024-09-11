@@ -68,26 +68,61 @@ class DatabaseServices implements IStorage {
         }
     }
 
+
+    private tableQueryGenerater() : string[] {
+        const userCreateTableQuery = `
+        CREATE TABLE IF NOT EXISTS users 
+        (
+            userID SERIAL PRIMARY KEY,
+            username VARCHAR(50) NOT NULL UNIQUE,
+            password VARCHAR(255) NOT NULL,
+            createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+            `;
+
+        const BrokerTableQuery = `
+         CREATE TABLE IF NOT EXISTS userBrokers
+        (
+            userBrokerId SERIAL PRIMARY KEY,
+            brokerName VARCHAR(50) NOT NULL,
+            brokerClientId VARCHAR(255) NOT NULL,
+            brokerClientSecret VARCHAR(255) NOT NULL,
+            brokerRedirectURI VARCHAR(255) NOT NULL,
+            extraData VARCHAR(255),
+            userID INTEGER,
+            CONSTRAINT fk_userId
+                FOREIGN KEY(userID)
+                REFERENCES users(userID),
+            CONSTRAINT unique_user_broker 
+                UNIQUE (userID, brokerName)
+        );
+        `
+            const DatabaseCreateQuery = [userCreateTableQuery, BrokerTableQuery];
+
+
+            return DatabaseCreateQuery
+    }
+
     public async createTableIfNotExist () {
         try {
             const client = DatabaseServices.client;
             if(!client) throw new DatabaseError("Internal Server Error", INTERNAL_SERVER_CODE, "Could not connect to the DB");
-            const createTableQuery = `
-                CREATE TABLE IF NOT EXISTS users (
-                    userID SERIAL PRIMARY KEY,
-                    username VARCHAR(50) NOT NULL UNIQUE,
-                    password VARCHAR(255) NOT NULL,
-                    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                );
-            `;
-            await client.query(createTableQuery);
+          
+            const tableQueriesArray = this.tableQueryGenerater();
+            let tableCompletionPromise : Promise<QueryResult<any>>[] = [];
+            for(let tableQuery of tableQueriesArray){
+                tableCompletionPromise.push(client.query(tableQuery));
+            }
+
+            await Promise.all(tableCompletionPromise);
+            
         } catch (error) {
             console.log(error);
            throw new DatabaseError("Internal Server Error", INTERNAL_SERVER_CODE, "Table Creation Unsuccesfull");
         }
     }
 
-    public async insertOne  (tableName : string, dataToBeSaved : Record<string, string>) : Promise<QueryResult<any>> {
+    public async insertOne  (tableName : string, dataToBeSaved : Record<string, any>) : Promise<QueryResult<any>> {
         let result : QueryResult<any>;
         try {      
             const client = DatabaseServices.client;

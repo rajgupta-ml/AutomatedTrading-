@@ -55,7 +55,7 @@ export class TokenizationServices{
         return token;
     }
 
-    public verifyAndRefreshToken(token : string, ) : {tokenVerified : Boolean, newToken? : string} {
+    public verifyAndRefreshToken(token : string, ) : { newToken? : string} {
 
         try {         
             const payload = jwt.verify(token, this.tokenSecret.publicKey, {
@@ -68,10 +68,10 @@ export class TokenizationServices{
              const timeLeftToExpire = ExpirationTime - nowInSeconds;
              if(timeLeftToExpire <= this.refreshThreshold){
                  const newToken = this.getToken(payload.username);
-                 return {tokenVerified : true, newToken};
+                 return {newToken};
              }
  
-             return {tokenVerified : true};
+             return {};
         } catch (error) {
             if(error instanceof JsonWebTokenError){
                 throw new JsonWebTokenError("illegal JWT", error);

@@ -1,12 +1,15 @@
 import { ErrorAndSuccessInterface } from "../interfaces/IErrorAndSuccess";
 
-export class SuccessResponse implements ErrorAndSuccessInterface {
+export class Response implements ErrorAndSuccessInterface {
     public success : Boolean;
     public statusCode: number;
-    public details?: string | undefined;
+    public details?: string ;
     public name: string;
     public message: string;
-    public data? : Record<string, string>
+    public data? : {
+        token? : string,
+        userId? : string
+    }
     
     
     constructor(
@@ -14,7 +17,7 @@ export class SuccessResponse implements ErrorAndSuccessInterface {
         name : string,
         message : string,
         details? : string,
-        data? : Record <string, string>
+        data? : {token? : string, userId? : string}
      ){
         this.success = true;
         this.statusCode = statusCode;
