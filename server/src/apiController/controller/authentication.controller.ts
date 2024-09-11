@@ -32,8 +32,7 @@ export class AuthController implements IAuthController {
     }
     async userLogin (request: express.Request, response : express.Response, next : NextFunction) : Promise <void>{
 
-        try {
-		//This is a test 
+        try { 
             const userDetails : IUserLogin = {...request.body};
             // Handling the Authentication 
             const result = await this.userServices.userLogin(userDetails);
