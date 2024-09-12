@@ -10,6 +10,7 @@ class CipherManager implements ICipher{
     private readonly ivLength: number
     private readonly saltLength: number
     private readonly tagLength: number
+    private readonly encryptionPassword? : string
 
 
     constructor() {
@@ -18,17 +19,19 @@ class CipherManager implements ICipher{
         this.ivLength = 12;
         this.saltLength = 16;
         this.tagLength = 16;
+        this.encryptionPassword = process.env.ENCRYPTION_KEY
     }
 
-    async encrypt(password: string): Promise<string> {
+    async encrypt(data: string): Promise<string> {
         try {
-            if(!password) throw new CipherError("Password can't be empty", BAD_REQUEST_CODE, "1001");
+            // console.log(this.encryptionPassword)
+            if(!data || !this.encryptionPassword) throw new CipherError("data can't be empty", BAD_REQUEST_CODE, "1001");
             const salt = crypto.randomBytes(this.saltLength);
-            const key = await this.deriveKey(password, salt);
+            const key = await this.deriveKey(this.encryptionPassword, salt);
             const iv = crypto.randomBytes(this.ivLength);
             const cipher = crypto.createCipheriv(this.algorithm , key, iv, {authTagLength : this.tagLength});
             
-            const encrypted = Buffer.concat([cipher.update(password, 'utf8'), cipher.final()]);
+            const encrypted = Buffer.concat([cipher.update(data, 'utf8'), cipher.final()]);
             const tag = cipher.getAuthTag();
             const result = Buffer.concat([salt, iv, tag, encrypted]).toString('base64');
             return result;
@@ -39,16 +42,17 @@ class CipherManager implements ICipher{
         }
     }
 
-    async decrypt(encryptedData: string, password: string): Promise<string> {
+    async decrypt(encryptedData: string): Promise<string> {
         try {
-            if(!encryptedData || !password) throw new CipherError("Data is required", BAD_REQUEST_CODE, "1003");
+            console.log(process.env.ENCRYPTION_KEY);
+            if(!encryptedData || !this.encryptionPassword) throw new CipherError("Data is required", BAD_REQUEST_CODE, "1003");
             const buffer = Buffer.from(encryptedData, 'base64');
             const salt = buffer.subarray(0, this.saltLength);
             const iv = buffer.subarray(this.saltLength, this.saltLength + this.ivLength);
             const tag = buffer.subarray(this.saltLength + this.ivLength, this.saltLength + this.ivLength + this.tagLength);
             const encrypted = buffer.subarray(this.saltLength + this.ivLength + this.tagLength);
     
-            const key = await this.deriveKey(password, salt);
+            const key = await this.deriveKey(this.encryptionPassword, salt);
             const decipher = crypto.createDecipheriv(this.algorithm, key, iv, { authTagLength: this.tagLength });
             decipher.setAuthTag(tag);
     

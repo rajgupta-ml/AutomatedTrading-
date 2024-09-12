@@ -150,9 +150,9 @@ describe('brokerRegistration', () => {
       const mockData = {
           userID: 'user123',
           brokerName: 'brokerName',
-          brokerClientId: 'clientId',
-          brokerClientSecret: 'clientSecret',
-          brokerRedirectURI: 'redirectURI',
+          userClientId: 'clientId',
+          userClientSecret: 'clientSecret',
+          userRedirectURI: 'redirectURI',
           extraData: { key: 'value' }
       };
 
@@ -167,9 +167,9 @@ describe('brokerRegistration', () => {
       expect(response.data).toEqual({ token: 'newValidToken' });
       expect(mockStorage.insertOne).toHaveBeenCalledWith('userBrokers', {
           ...mockData,
-          brokerClientId: 'encrypted-clientId',
-          brokerClientSecret: 'encrypted-clientSecret',
-          brokerRedirectURI: 'encrypted-redirectURI',
+          userClientId: 'encrypted-clientId',
+          userClientSecret: 'encrypted-clientSecret',
+          userRedirectURI: 'encrypted-redirectURI',
           extraData: JSON.stringify({ key: 'value' }),
           userID: 'user123',
           brokerName: 'brokerName'
@@ -180,9 +180,9 @@ describe('brokerRegistration', () => {
       const mockToken = 'invalidToken';
       const mockData: IDataToBeRegistered = {
         "brokerName":"Upstox",
-        "brokerClientId" : "asasdas",
-        "brokerClientSecret" : "sdasdasd",
-        "brokerRedirectURI" : "https://localhost.com",
+        "userClientId" : "asasdas",
+        "userClientSecret" : "sdasdasd",
+        "userRedirectURI" : "https://localhost.com",
         "userID" : "1"
       };
 
@@ -205,9 +205,9 @@ describe('brokerRegistration', () => {
       const mockToken = 'validToken';
       const mockData: IDataToBeRegistered = {
         "brokerName":"Upstox",
-        "brokerClientId" : "asasdas",
-        "brokerClientSecret" : "sdasdasd",
-        "brokerRedirectURI" : "https://localhost.com",
+        "userClientId" : "asasdas",
+        "userClientSecret" : "sdasdasd",
+        "userRedirectURI" : "https://localhost.com",
         "userID" : "1"
       };
 
@@ -223,9 +223,9 @@ describe('brokerRegistration', () => {
       const mockToken = 'validToken';
       const mockData: IDataToBeRegistered = {
         "brokerName":"Upstox",
-        "brokerClientId" : "asasdas",
-        "brokerClientSecret" : "sdasdasd",
-        "brokerRedirectURI" : "https://localhost.com",
+        "userClientId" : "asasdas",
+        "userClientSecret" : "sdasdasd",
+        "userRedirectURI" : "https://localhost.com",
         "userID" : "1"
       };
 

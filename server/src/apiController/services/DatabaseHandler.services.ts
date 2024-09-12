@@ -7,38 +7,38 @@ import { IStorage } from '../interfaces/IStorage';
 class DatabaseServices implements IStorage {
     // Private constructor to prevent instantiation
 
-    private readonly user : string | undefined;
-    private readonly host : string | undefined;
-    private readonly database : string | undefined;
-    private readonly password : string | undefined;
-    private readonly port : number | undefined;
-    private static instance : DatabaseServices | null= null
-    public static client : Client | null = null;
+    private readonly user: string | undefined;
+    private readonly host: string | undefined;
+    private readonly database: string | undefined;
+    private readonly password: string | undefined;
+    private readonly port: number | undefined;
+    private static instance: DatabaseServices | null = null
+    public static client: Client | null = null;
     private constructor() {
         // Initialization The database Details
-        this.user = process.env.PG_USER ;
+        this.user = process.env.PG_USER;
         this.host = process.env.PG_HOST;
         this.database = process.env.PG_DATABASE;
         this.password = process.env.PG_PASSWORD;
     }
 
 
-    public static getInstance() :DatabaseServices {
-        if(!DatabaseServices.instance) {
+    public static getInstance(): DatabaseServices {
+        if (!DatabaseServices.instance) {
             DatabaseServices.instance = new DatabaseServices();
         }
         return DatabaseServices.instance;
     }
-    
-    private getClient() : Client{
-        if(!DatabaseServices.client){
+
+    private getClient(): Client {
+        if (!DatabaseServices.client) {
             DatabaseServices.client = new Client({
-                user : this.user,
-                host : this.host,
-                database : this.database,
-                password : this.password,
-                port : this.port,
-                
+                user: this.user,
+                host: this.host,
+                database: this.database,
+                password: this.password,
+                port: this.port,
+
             })
         }
         return DatabaseServices.client;
@@ -59,17 +59,17 @@ class DatabaseServices implements IStorage {
         try {
             const client = DatabaseServices.client;
 
-            if(!client) throw new DatabaseError("Internal Server Error", INTERNAL_SERVER_CODE, "Could not connect to the DB");
+            if (!client) throw new DatabaseError("Internal Server Error", INTERNAL_SERVER_CODE, "Could not connect to the DB");
             await client.end();
             DatabaseServices.client = null;
             console.log('Disconnected from the database successfully.');
         } catch (err) {
-           throw new DatabaseError("Internal Server Error", INTERNAL_SERVER_CODE, "Disconnect Unsuccessful");
+            throw new DatabaseError("Internal Server Error", INTERNAL_SERVER_CODE, "Disconnect Unsuccessful");
         }
     }
 
 
-    private tableQueryGenerater() : string[] {
+    private tableQueryGenerater(): string[] {
         const userCreateTableQuery = `
         CREATE TABLE IF NOT EXISTS users 
         (
@@ -85,9 +85,9 @@ class DatabaseServices implements IStorage {
         (
             userBrokerId SERIAL PRIMARY KEY,
             brokerName VARCHAR(50) NOT NULL,
-            brokerClientId VARCHAR(255) NOT NULL,
-            brokerClientSecret VARCHAR(255) NOT NULL,
-            brokerRedirectURI VARCHAR(255) NOT NULL,
+            userClientId VARCHAR(255) NOT NULL,
+            userClientSecret VARCHAR(255) NOT NULL,
+            userRedirectURI VARCHAR(255) NOT NULL,
             extraData VARCHAR(255),
             userID INTEGER,
             CONSTRAINT fk_userId
@@ -97,71 +97,70 @@ class DatabaseServices implements IStorage {
                 UNIQUE (userID, brokerName)
         );
         `
-            const DatabaseCreateQuery = [userCreateTableQuery, BrokerTableQuery];
+        const DatabaseCreateQuery = [userCreateTableQuery, BrokerTableQuery];
 
 
-            return DatabaseCreateQuery
+        return DatabaseCreateQuery
     }
 
-    public async createTableIfNotExist () {
+    public async createTableIfNotExist() {
         try {
             const client = DatabaseServices.client;
-            if(!client) throw new DatabaseError("Internal Server Error", INTERNAL_SERVER_CODE, "Could not connect to the DB");
-          
+            if (!client) throw new DatabaseError("Internal Server Error", INTERNAL_SERVER_CODE, "Could not connect to the DB");
+
             const tableQueriesArray = this.tableQueryGenerater();
-            let tableCompletionPromise : Promise<QueryResult<any>>[] = [];
-            for(let tableQuery of tableQueriesArray){
+            let tableCompletionPromise: Promise<QueryResult<any>>[] = [];
+            for (let tableQuery of tableQueriesArray) {
                 tableCompletionPromise.push(client.query(tableQuery));
             }
 
             await Promise.all(tableCompletionPromise);
-            
+
         } catch (error) {
             console.log(error);
-           throw new DatabaseError("Internal Server Error", INTERNAL_SERVER_CODE, "Table Creation Unsuccesfull");
+            throw new DatabaseError("Internal Server Error", INTERNAL_SERVER_CODE, "Table Creation Unsuccesfull");
         }
     }
 
-    public async insertOne  (tableName : string, dataToBeSaved : Record<string, any>) : Promise<QueryResult<any>> {
-        let result : QueryResult<any>;
-        try {      
+    public async insertOne(tableName: string, dataToBeSaved: Record<string, any>): Promise<QueryResult<any>> {
+        let result: QueryResult<any>;
+        try {
             const client = DatabaseServices.client;
-            if(!client) throw new DatabaseError("Internal Server Error", INTERNAL_SERVER_CODE, "Could not connect to the DB");
+            if (!client) throw new DatabaseError("Internal Server Error", INTERNAL_SERVER_CODE, "Could not connect to the DB");
             //Table name and object    
-            const keys : string[] = [];
-            const values : string[] = [];
-            const placeholders : string[] = [];
+            const keys: string[] = [];
+            const values: string[] = [];
+            const placeholders: string[] = [];
             Object.entries(dataToBeSaved).map(([key, value], index) => {
                 keys.push(key);
                 values.push(value);
-                 placeholders.push(`$${index + 1}`);
+                placeholders.push(`$${index + 1}`);
             })
-    
+
             const stringKeys = keys.join(",")
             const query = `INSERT INTO ${tableName}(${stringKeys}) VALUES (${placeholders.join(",")}) RETURNING *`;
             result = await client.query(query, values);
         } catch (error) {
-            if(error instanceof Error && 'code' in error){
+            if (error instanceof Error && 'code' in error) {
 
-                throw new DatabaseError (error.message, BAD_REQUEST_CODE, "BAD REQUEST (Could Not Insert The data)");
+                throw new DatabaseError(error.message, BAD_REQUEST_CODE, "BAD REQUEST (Could Not Insert The data)");
             }
             if (error instanceof DatabaseError) {
                 throw error;
             }
-                throw new UnknownError("Internal Server Error");
-            
+            throw new UnknownError("Internal Server Error");
+
         }
         return result;
     }
 
-    public async updateOne (
-        tableName: string, 
-        updateColumn: string, 
-        updateValue: string, 
-        conditionColumnAndValues: Record<string, string>, 
+    public async updateOne(
+        tableName: string,
+        updateColumn: string,
+        updateValue: string,
+        conditionColumnAndValues: Record<string, string>,
         LogicalOperator?: Array<string>
-    ): Promise<QueryResult<any>>
-    {
+    ): Promise<QueryResult<any>> {
         let result: QueryResult<any>;
 
         try {
@@ -208,7 +207,7 @@ class DatabaseServices implements IStorage {
 
         // Constructing column selection
         let columnSelectionQuery = columnSeleted ? columnSeleted.join(",") : "*";
-        
+
         // Constructing condition query
         let conditionQuery = "";
         if (condition) {
@@ -283,7 +282,7 @@ class DatabaseServices implements IStorage {
 
         return result;
     }
-    
+
     public async executeRawSQL(query: string, values?: any[]): Promise<QueryResult<any>> {
         let result: QueryResult<any>;
 
@@ -307,7 +306,7 @@ class DatabaseServices implements IStorage {
         return result;
     }
 
-    }
+}
 
 
 
