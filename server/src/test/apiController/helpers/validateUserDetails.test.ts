@@ -1,5 +1,5 @@
-import { InvalidUserDetailError } from "../../apiController/errors/InvalidUserDetails.error";
-import { validateUserDetails } from "../../apiController/helpers/dataValidation.helper";
+import { InvalidUserDetailError } from "../../../apiController/errors/InvalidUserDetails.error";
+import { validateUserDetails } from "../../../apiController/helpers/dataValidation.helper";
 
 // Test user details validation
 describe("validateUserDetails", () => {

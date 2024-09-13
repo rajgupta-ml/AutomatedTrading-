@@ -1,5 +1,5 @@
-import { TokenizationServices } from "../../apiController/services/TokenizationHandler.services";
 import jwt from "jsonwebtoken"; // to verify token structure
+import { TokenizationServices } from "../../../../apiController/services/TokenizationHandler.services";
 
 describe("Tokenization Service Testing", () => {
     let tokenizer: TokenizationServices;
@@ -35,9 +35,9 @@ describe("Tokenization Service Testing", () => {
         it("should return a new token if the token is nearing expiration", () => {
             const token = tokenizer.getToken("Raj Gupta");
             setTimeout(() => {
-                const {newToken} = tokenizer.verifyAndRefreshToken(token);
+                const { newToken } = tokenizer.verifyAndRefreshToken(token);
                 expect(newToken).toBeDefined();
-            },1000)
+            }, 1000)
 
         });
 

@@ -1,7 +1,6 @@
 import { Client, QueryResult } from "pg";
-import DatabaseServices from "../../apiController/services/DatabaseHandler.services";
-import { DatabaseError } from "../../apiController/errors/Database.error";
-
+import DatabaseServices from "../../../../apiController/services/DatabaseHandler.services";
+import { DatabaseError } from "../../../../apiController/errors/Database.error";
 jest.mock('pg', () => {
     const mClient = {
         query: jest.fn(),
@@ -75,9 +74,9 @@ describe("Database Update One testing", () => {
             (mockClient.query as jest.Mock).mockRejectedValueOnce(mockDbError);
 
             await expect(dbServices.updateOne(tableName, updateColumn, updateValue, condition))
-        .rejects
-        .toThrow(DatabaseError);
-});
+                .rejects
+                .toThrow(DatabaseError);
+        });
         it("If Client is null Should throw DatabaseError and Handle it.", async () => {
             DatabaseServices.client = null;
 

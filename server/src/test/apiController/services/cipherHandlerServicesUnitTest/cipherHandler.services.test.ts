@@ -1,10 +1,9 @@
-import { CipherError } from "../../apiController/errors/Cipher.error";
-import { ICipher } from "../../apiController/interfaces/ICipher";
-import CipherManager from "../../apiController/services/CipherHandler.services";
+import { CipherError } from "../../../../apiController/errors/Cipher.error";
+import { ICipher } from "../../../../apiController/interfaces/ICipher";
+import CipherManager from "../../../../apiController/services/CipherHandler.services";
 
 describe("Cipher Service Testing", () => {
     let cipherManager: ICipher;
-
     beforeAll(() => {
         process.env.ENCRYPTION_KEY = 'test_password';
         cipherManager = new CipherManager();

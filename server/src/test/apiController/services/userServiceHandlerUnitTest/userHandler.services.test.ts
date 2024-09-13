@@ -1,18 +1,17 @@
-import { QueryResult } from "pg";
-import { CipherError } from "../../apiController/errors/Cipher.error";
-import { DatabaseError } from "../../apiController/errors/Database.error";
-import { InternalServerError } from "../../apiController/errors/InternalServer.error";
-import { InvalidUserDetailError } from "../../apiController/errors/InvalidUserDetails.error";
-import { ICipher } from "../../apiController/interfaces/ICipher";
-import { IStorage } from "../../apiController/interfaces/IStorage";
-import { ITokenizer } from "../../apiController/interfaces/ITokenizer";
-import { UserServices } from "../../apiController/services/UserHandler.services";
-import { INTERNAL_SERVER_CODE } from "../../apiController/statusCode/statusCode";
-import { Response } from "../../apiController/success/Response.success";
+import { ICipher } from "../../../../apiController/interfaces/ICipher";
+import { IStorage } from "../../../../apiController/interfaces/IStorage";
+import { ITokenizer } from "../../../../apiController/interfaces/ITokenizer";
+import { UserServices } from "../../../../apiController/services/UserHandler.services";
+import { InternalServerError } from "../../../../apiController/errors/InternalServer.error";
+import { InvalidUserDetailError } from "../../../../apiController/errors/InvalidUserDetails.error";
+import { CipherError } from "../../../../apiController/errors/Cipher.error";
+import { INTERNAL_SERVER_CODE } from "../../../../apiController/statusCode/statusCode";
+import { DatabaseError } from "../../../../apiController/errors/Database.error";
+import { IDataToBeRegistered } from "../../../../apiController/interfaces/IDataToBeRegistered";
+import { UnknownError } from "../../../../apiController/errors/Unknown.error";
+import { UnauthorizedUser } from "../../../../apiController/errors/UnauthorizedUser.error";
 import { JsonWebTokenError } from "jsonwebtoken";
-import { IDataToBeRegistered } from "../../apiController/interfaces/IDataToBeRegistered";
-import { UnauthorizedUser } from "../../apiController/errors/UnauthorizedUser.error";
-import { UnknownError } from "../../apiController/errors/Unknown.error";
+import { Response } from "../../../../apiController/success/Response.success";
 
 describe("UserServices Tests", () => {
   let mockStorage: jest.Mocked<IStorage>;
