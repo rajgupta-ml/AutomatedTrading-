@@ -78,7 +78,7 @@ export class UserServices implements IUserServices {
             // create JWT 
             const token = this.token.getToken(result.rows[0].username);
             // send the Response
-            return new Response(SUCCESSFULL_CODE, "Authentication Done", "login successful", undefined, { token, userId: result.rows[0].userID });
+            return new Response(SUCCESSFULL_CODE, "Authentication Done", "login successful", undefined, { token, userId: result.rows[0].userid });
         } catch (error) {
             // Make the error more generic If DatabaseError or CipherError is throw then log it and Throw a more generic error
             if (error instanceof InvalidUserDetailError) {
