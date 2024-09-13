@@ -9,6 +9,7 @@ import { IDataToBeRegistered } from "../interfaces/IDataToBeRegistered";
 import { responseHandlerForSuccess } from "../response/successHandler.response";
 import { BrokerService } from "../services/BrokerHandler.services";
 import { BrokerSelector } from "../services/brokerSelector.service";
+import { validateUserDetails } from "../helpers/dataValidation.helper";
 
 
 
@@ -76,6 +77,21 @@ export class AuthController implements IAuthController {
             next(error);
         }
 
+    }
+
+
+    async getAccessToken(request: express.Request, response: express.Response, next: express.NextFunction) {
+
+        try {
+            const token = request.cookies["set-cookies"];
+            if (!token) throw new UnauthorizedUser("Unauthorized User");
+            validateUserDetails(request.body, ["userID", "code", "brokerName"]);
+            const brokerInstance = this.brokerSelector.getBroker(request.body.brokerName);
+            const result = await this.brokerServices.getAccessToken(request.body);
+            return responseHandlerForSuccess(response, result);
+        } catch (error) {
+            next(error)
+        }
     }
 
 }

@@ -9,10 +9,12 @@ import { UnknownError } from "../errors/Unknown.error";
 import DatabaseServices from "./DatabaseHandler.services";
 import { CipherError } from "../errors/Cipher.error";
 import { JsonWebTokenError } from "jsonwebtoken";
+import { UnauthorizedUser } from "../errors/UnauthorizedUser.error";
+import { SUCCESSFULL_CODE } from "../statusCode/statusCode";
 
 
-interface BrokerData{
-    [key : string] : string
+interface BrokerData {
+    [key: string]: string
 }
 export class BrokerService implements IBrokers {
     private storage: IStorage;
@@ -38,16 +40,16 @@ export class BrokerService implements IBrokers {
 
             // broker registered with client or not check;
             if (!databaseResult.rows[0]) throw new BrokerServiceError("Broker is not registered", 400);
-            
+
             //Encrypt the clientID and redirectURI
-            let data : BrokerData = {}
-           await Promise.all(Object.entries(databaseResult.rows[0]).map(async ([key, value]) => {
+            let data: BrokerData = {}
+            await Promise.all(Object.entries(databaseResult.rows[0]).map(async ([key, value]) => {
                 data[key] = await this.cipher.decrypt(value as string);
             }))
-            const {userclientid, userredirecturi} = data;
+            const { userclientid, userredirecturi } = data;
             //Getting the OAuthURI from the upstox SDK;
             const URI = this.broker.getAuthenticated().getOAuthURI({ clientId: userclientid, redirectURI: userredirecturi });
-            return new Response(200, "oAuthURI", "oAuth URI generated", undefined, { OAuthURI: URI, ...(token ? { token } : {}) } );
+            return new Response(200, "oAuthURI", "oAuth URI generated", undefined, { OAuthURI: URI, ...(token ? { token } : {}) });
 
         } catch (error) {
             console.log(error);
@@ -60,6 +62,20 @@ export class BrokerService implements IBrokers {
                 throw error;
 
             }
+            throw new UnknownError("Internal Server Error");
+        }
+    }
+
+
+    async getAccessToken({ userID, code, brokerName }): Promise<Response> {
+
+        try {
+
+
+
+            return new Response(200, "getAccessToken", "Access token generated successfully");
+        } catch (error) {
+
             throw new UnknownError("Internal Server Error");
         }
     }
