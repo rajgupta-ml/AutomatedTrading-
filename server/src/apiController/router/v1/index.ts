@@ -7,4 +7,6 @@ v1Router.post("/register", authenticationController.userRegister.bind(authentica
 v1Router.post("/login", authenticationController.userLogin.bind(authenticationController));
 v1Router.post("/broker_registration", authenticationController.brokerRegistration.bind(authenticationController));
 v1Router.post("/broker_oauth_uri", authenticationController.getOAuthURI.bind(authenticationController));
+v1Router.post("/broker_access_token", authenticationController.getAccessToken.bind(authenticationController));
+
 export default v1Router;

@@ -10,7 +10,8 @@ import DatabaseServices from "./DatabaseHandler.services";
 import { CipherError } from "../errors/Cipher.error";
 import { JsonWebTokenError } from "jsonwebtoken";
 import { UnauthorizedUser } from "../errors/UnauthorizedUser.error";
-import { SUCCESSFULL_CODE } from "../statusCode/statusCode";
+import { BAD_REQUEST_CODE, SUCCESSFULL_CODE } from "../statusCode/statusCode";
+
 
 
 interface BrokerData {
@@ -37,22 +38,17 @@ export class BrokerService implements IBrokers {
             if (!this.broker) throw new BrokerServiceError("Broker not decided Yet", 400);
             // Find the broker clientId and redirect URI where userId and brokerName matches;
             const databaseResult = await this.storage.findOne("userBrokers", ["userClientId", "userRedirectURI"], { brokerName, userID }, ["AND"]);
-
             // broker registered with client or not check;
             if (!databaseResult.rows[0]) throw new BrokerServiceError("Broker is not registered", 400);
 
             //Encrypt the clientID and redirectURI
-            let data: BrokerData = {}
-            await Promise.all(Object.entries(databaseResult.rows[0]).map(async ([key, value]) => {
-                data[key] = await this.cipher.decrypt(value as string);
-            }))
-            const { userclientid, userredirecturi } = data;
+            const { userclientid, userredirecturi } = await this.decryptData(databaseResult.rows[0]);
             //Getting the OAuthURI from the upstox SDK;
             const URI = this.broker.getAuthenticated().getOAuthURI({ clientId: userclientid, redirectURI: userredirecturi });
-            return new Response(200, "oAuthURI", "oAuth URI generated", undefined, { OAuthURI: URI, ...(token ? { token } : {}) });
+            return new Response(200, "oAuthURI", "oAuth URI generated", undefined, { OAuthURI: URI, ...(newToken ? { token: newToken } : {}) });
 
         } catch (error) {
-            console.log(error);
+            // console.log(error);
             if (error instanceof BrokerServiceError || error instanceof DatabaseServices || error instanceof JsonWebTokenError) {
                 throw error;
             }
@@ -67,17 +63,52 @@ export class BrokerService implements IBrokers {
     }
 
 
-    async getAccessToken({ userID, code, brokerName }): Promise<Response> {
+    async getAccessToken({ userID, code, brokerName }: Record<string, string>, token: string): Promise<Response> {
 
         try {
+            if (!this.broker) throw new BrokerServiceError("user has not registered this broker", BAD_REQUEST_CODE);
+            const { newToken } = this.token.verifyAndRefreshToken(token);
+            const result = await this.storage.findOne(
+                "userBrokers",
+                ["userClientId", "userRedirectURI", "userClientSecret"],
+                { brokerName, userID },
+                ["AND"]
+            );
+            if (!result.rows[0]) throw new BrokerServiceError("user is not registered with this user", BAD_REQUEST_CODE);
+            const { userclientid, userredirecturi, userclientsecret } = await this.decryptData(result.rows[0]);
+            const response  = await this.broker.getAuthenticated().getAccessToken(
+                {
+                    clientId: userclientid,
+                    clientSecret: userclientsecret,
+                    code,
+                    redirectURI: userredirecturi
+                });
 
-
-
-            return new Response(200, "getAccessToken", "Access token generated successfully");
+            return new Response(200, "getAccessToken", "Access token generated successfully", undefined, { ...(newToken ? { token: newToken } : {}),  access_token : response.access_token })
         } catch (error) {
+            if (error instanceof CipherError) {
+                console.error(error);
+                throw error;
+
+            }
+            if (error instanceof BrokerServiceError || error instanceof DatabaseServices || error instanceof JsonWebTokenError) {
+                throw error;
+            }
 
             throw new UnknownError("Internal Server Error");
         }
+    }
+
+
+
+
+    private decryptData = async (data: BrokerData) => {
+        const result: BrokerData = {};
+
+        await Promise.all(Object.entries(data).map(async ([key, value]) => {
+            data[key] = await this.cipher.decrypt(value as string);
+        }))
+        return data;
     }
 
 

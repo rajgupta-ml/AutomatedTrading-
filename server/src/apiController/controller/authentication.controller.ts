@@ -83,11 +83,11 @@ export class AuthController implements IAuthController {
     async getAccessToken(request: express.Request, response: express.Response, next: express.NextFunction) {
 
         try {
-            const token = request.cookies["set-cookies"];
+            const token = request.cookies["set-cookie"];
             if (!token) throw new UnauthorizedUser("Unauthorized User");
             validateUserDetails(request.body, ["userID", "code", "brokerName"]);
             const brokerInstance = this.brokerSelector.getBroker(request.body.brokerName);
-            const result = await this.brokerServices.getAccessToken(request.body);
+            const result = await this.brokerServices.getAccessToken(request.body, token);
             return responseHandlerForSuccess(response, result);
         } catch (error) {
             next(error)

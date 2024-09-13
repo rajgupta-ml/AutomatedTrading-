@@ -10,6 +10,7 @@ export class Response implements ErrorAndSuccessInterface {
         token?: string,
         userId?: string,
         OAuthURI?: URL,
+        access_token? : string
     }
 
 
@@ -18,7 +19,7 @@ export class Response implements ErrorAndSuccessInterface {
         name: string,
         message: string,
         details?: string,
-        data?: { token?: string, userId?: string, OAuthURI?: URL }
+        data?: { token?: string, userId?: string, OAuthURI?: URL, access_token? : string }
     ) {
         this.success = true;
         this.statusCode = statusCode;

@@ -24,7 +24,7 @@ class CipherManager implements ICipher{
 
     async encrypt(data: string): Promise<string> {
         try {
-            // console.log(this.encryptionPassword)
+      
             if(!data || !this.encryptionPassword) throw new CipherError("data can't be empty", BAD_REQUEST_CODE, "1001");
             const salt = crypto.randomBytes(this.saltLength);
             const key = await this.deriveKey(this.encryptionPassword, salt);
@@ -44,7 +44,6 @@ class CipherManager implements ICipher{
 
     async decrypt(encryptedData: string): Promise<string> {
         try {
-            console.log(process.env.ENCRYPTION_KEY);
             if(!encryptedData || !this.encryptionPassword) throw new CipherError("Data is required", BAD_REQUEST_CODE, "1003");
             const buffer = Buffer.from(encryptedData, 'base64');
             const salt = buffer.subarray(0, this.saltLength);

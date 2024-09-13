@@ -1,11 +1,12 @@
 
-import { IAuthentication } from "../interfaces/IUpstox"
+import { IAuthentication, IUpstoxResponse } from "../interfaces/IUpstox"
 import { IUpstoxGetAccessToken, IUpstoxGetOAuthURI } from "../../Upstox/interfaces/IUpstox"
 import { BadRequestUpstoxError } from "../errors/UpstoxError"
 import { IHttpClient } from "../interfaces/IHttpClient"
 import { HttpClient } from "../core/HttpClient"
-export class UpstoxAuthentication implements IAuthentication {
 
+
+export class UpstoxAuthentication implements IAuthentication {
 
 	//TODO : Handling the Unknow errors which would occur
 
@@ -23,10 +24,11 @@ export class UpstoxAuthentication implements IAuthentication {
 		return OAuthURI;
 	}
 
-	async getAccessToken(params: IUpstoxGetAccessToken): Promise<any> {
+	async getAccessToken(params: IUpstoxGetAccessToken): Promise<IUpstoxResponse> {
 		const { code, clientId, clientSecret, redirectURI } = params
 
 		if (!code || !clientId || !clientSecret || !redirectURI) throw new BadRequestUpstoxError("Bad Request, Required Field empty");
+
 		const URI = 'https://api.upstox.com/v2/login/authorization/token'
 		const data = {
 			code,
@@ -36,13 +38,14 @@ export class UpstoxAuthentication implements IAuthentication {
 			grant_type: "authorization_code",
 		}
 
+
 		const config = {
-			Headers: {
-				"accept": "application/json",
-				"Content-type": "application/x-www-form-urlencoded"
+			headers: {
+				'accept': 'application/json',
+				'Content-Type': 'application/x-www-form-urlencoded',
 			}
 		}
-		const response = await this.httpClient.post(URI, data, config);
+		const response : IUpstoxResponse = await this.httpClient.post(URI, data, config);
 		return response
 	}
 }
