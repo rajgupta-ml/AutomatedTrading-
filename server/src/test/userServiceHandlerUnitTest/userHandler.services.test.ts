@@ -24,15 +24,15 @@ describe("UserServices Tests", () => {
     mockStorage = {
       insertOne: jest.fn(),
       findOne: jest.fn(),
-      updateOne : jest.fn(),
-      deleteOne : jest.fn(),
-      executeRawSQL : jest.fn(),
+      updateOne: jest.fn(),
+      deleteOne: jest.fn(),
+      executeRawSQL: jest.fn(),
     };
     mockCipher = {
       hash: jest.fn(),
       compareHash: jest.fn(),
       encrypt: jest.fn(),
-      decrypt : jest.fn()
+      decrypt: jest.fn()
     };
     mockTokenizer = {
       getToken: jest.fn(),
@@ -62,7 +62,7 @@ describe("UserServices Tests", () => {
 
     it("should throw InvalidUserDetailError when required fields are missing", async () => {
       const invalidUserDetails = { username: "" }; // No password
-        // @ts-ignore
+      // @ts-ignore
       await expect(userServices.userRegister(invalidUserDetails)).rejects.toThrow(InvalidUserDetailError);
     });
 
@@ -124,36 +124,21 @@ describe("UserServices Tests", () => {
     });
   });
 
-  // 3. Test user details validation
-  describe("validateUserDetails", () => {
-    it("should throw InvalidUserDetailError if username is missing", () => {
-      const invalidUserDetails = { password: "password123" };
-        //@ts-ignore
-      expect(() => userServices["validateUserDetails"](invalidUserDetails, ["username", "password"]),).toThrow(InvalidUserDetailError);
-    });
-
-    it("should throw InvalidUserDetailError if password is missing", () => {
-      const invalidUserDetails = { username: "user" };
-        //@ts-ignore
-      expect(() => userServices["validateUserDetails"](invalidUserDetails, ["username", "password"])).toThrow(InvalidUserDetailError);
-    });
-  });
 
 
 
+  describe('brokerRegistration', () => {
 
-describe('brokerRegistration', () => {
 
-
-  test('should complete successfully with valid data', async () => {
+    test('should complete successfully with valid data', async () => {
       const mockToken = 'validToken';
       const mockData = {
-          userID: 'user123',
-          brokerName: 'brokerName',
-          userClientId: 'clientId',
-          userClientSecret: 'clientSecret',
-          userRedirectURI: 'redirectURI',
-          extraData: { key: 'value' }
+        userID: 'user123',
+        brokerName: 'brokerName',
+        userClientId: 'clientId',
+        userClientSecret: 'clientSecret',
+        userRedirectURI: 'redirectURI',
+        extraData: { key: 'value' }
       };
 
       mockTokenizer.verifyAndRefreshToken.mockReturnValue({ newToken: 'newValidToken' });
@@ -166,67 +151,67 @@ describe('brokerRegistration', () => {
       expect(response.message).toBe('BrokerRegistrationComplete');
       expect(response.data).toEqual({ token: 'newValidToken' });
       expect(mockStorage.insertOne).toHaveBeenCalledWith('userBrokers', {
-          ...mockData,
-          userClientId: 'encrypted-clientId',
-          userClientSecret: 'encrypted-clientSecret',
-          userRedirectURI: 'encrypted-redirectURI',
-          extraData: JSON.stringify({ key: 'value' }),
-          userID: 'user123',
-          brokerName: 'brokerName'
+        ...mockData,
+        userClientId: 'encrypted-clientId',
+        userClientSecret: 'encrypted-clientSecret',
+        userRedirectURI: 'encrypted-redirectURI',
+        extraData: JSON.stringify({ key: 'value' }),
+        userID: 'user123',
+        brokerName: 'brokerName'
       });
-  });
+    });
 
-  test('should throw UnauthorizedUser for invalid token', async () => {
+    test('should throw UnauthorizedUser for invalid token', async () => {
       const mockToken = 'invalidToken';
       const mockData: IDataToBeRegistered = {
-        "brokerName":"Upstox",
-        "userClientId" : "asasdas",
-        "userClientSecret" : "sdasdasd",
-        "userRedirectURI" : "https://localhost.com",
-        "userID" : "1"
+        "brokerName": "Upstox",
+        "userClientId": "asasdas",
+        "userClientSecret": "sdasdasd",
+        "userRedirectURI": "https://localhost.com",
+        "userID": "1"
       };
 
       mockTokenizer.verifyAndRefreshToken.mockImplementation(() => { throw new JsonWebTokenError('Invalid token'); });
       await expect(userServices.brokerRegistration(mockData, mockToken))
-          .rejects
-          .toThrow(UnauthorizedUser);
-  });
+        .rejects
+        .toThrow(UnauthorizedUser);
+    });
 
-  test('should throw InvalidUserDetailError for missing required fields', async () => {
+    test('should throw InvalidUserDetailError for missing required fields', async () => {
       const mockToken = 'validToken';
       const mockData = { brokerName: 'brokerName' }; // Missing required fields
       //@ts-ignore
       await expect(userServices.brokerRegistration(mockData, mockToken))
-          .rejects
-          .toThrow(InvalidUserDetailError);
-  });
+        .rejects
+        .toThrow(InvalidUserDetailError);
+    });
 
-  test('should handle encryption failure', async () => {
+    test('should handle encryption failure', async () => {
       const mockToken = 'validToken';
       const mockData: IDataToBeRegistered = {
-        "brokerName":"Upstox",
-        "userClientId" : "asasdas",
-        "userClientSecret" : "sdasdasd",
-        "userRedirectURI" : "https://localhost.com",
-        "userID" : "1"
+        "brokerName": "Upstox",
+        "userClientId": "asasdas",
+        "userClientSecret": "sdasdasd",
+        "userRedirectURI": "https://localhost.com",
+        "userID": "1"
       };
 
       mockTokenizer.verifyAndRefreshToken.mockReturnValue({ newToken: 'newValidToken' });
       mockCipher.encrypt.mockImplementation(() => Promise.reject(new Error('Encryption error')));
 
       await expect(userServices.brokerRegistration(mockData, mockToken))
-          .rejects
-          .toThrow(UnknownError); // Adjust based on your actual error handling
-  });
+        .rejects
+        .toThrow(UnknownError); // Adjust based on your actual error handling
+    });
 
-  test('should handle database insertion failure', async () => {
+    test('should handle database insertion failure', async () => {
       const mockToken = 'validToken';
       const mockData: IDataToBeRegistered = {
-        "brokerName":"Upstox",
-        "userClientId" : "asasdas",
-        "userClientSecret" : "sdasdasd",
-        "userRedirectURI" : "https://localhost.com",
-        "userID" : "1"
+        "brokerName": "Upstox",
+        "userClientId": "asasdas",
+        "userClientSecret": "sdasdasd",
+        "userRedirectURI": "https://localhost.com",
+        "userID": "1"
       };
 
       mockTokenizer.verifyAndRefreshToken.mockReturnValue({ newToken: 'newValidToken' });
@@ -234,9 +219,9 @@ describe('brokerRegistration', () => {
       mockStorage.insertOne.mockRejectedValue(new DatabaseError('Database error', 400));
 
       await expect(userServices.brokerRegistration(mockData, mockToken))
-          .rejects
-          .toThrow(DatabaseError);
+        .rejects
+        .toThrow(DatabaseError);
+    });
   });
-});
 });
 

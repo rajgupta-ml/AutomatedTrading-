@@ -13,7 +13,7 @@ import { InternalServerError } from "../errors/InternalServer.error";
 import { IDataToBeRegistered } from "../interfaces/IDataToBeRegistered";
 import { JsonWebTokenError } from "jsonwebtoken";
 import { UnauthorizedUser } from "../errors/UnauthorizedUser.error";
-
+import { validateUserDetails } from "../helpers/dataValidation.helper";
 export class UserServices implements IUserServices {
     private cipher: ICipher
     private storage: IStorage
@@ -29,11 +29,10 @@ export class UserServices implements IUserServices {
 
 
         try {
-            const validateUserDetails: Record<string, string> = { ...userDetails }
+            const validateUserData: Record<string, string> = { ...userDetails }
             // console.log(validateUserDetails);
             //Validating the required field
-            this.validateUserDetails(validateUserDetails, ["username", "password"]);
-
+            validateUserDetails(validateUserData, ["username", "password"])
             // hashing the password 
             const hashedPassword = this.cipher.hash(userDetails.password as string);
 
@@ -69,8 +68,8 @@ export class UserServices implements IUserServices {
         // Check if the user Exist or Not
         try {
 
-            const validateUserDetails: Record<string, any> = { ...userDetails };
-            this.validateUserDetails(validateUserDetails, ["username", "password"]);
+            const validateUserData: Record<string, any> = { ...userDetails };
+            validateUserDetails(validateUserData, ["username", "password"]);
             const result = await this.storage.findOne("users", undefined, { username: userDetails.username });
             if (result.rows[0] === undefined) throw new InvalidUserDetailError("Invalid username and password", UNAUTHORIZED_STATUS_CODE);
             // if Exist compare the has
@@ -98,8 +97,8 @@ export class UserServices implements IUserServices {
 
     async brokerRegistration(dataToBeRegistered: IDataToBeRegistered, token: string): Promise<Response> {
         try {
-            const validateUserDetails: Record<string, any> = { ...dataToBeRegistered }
-            this.validateUserDetails(validateUserDetails, ["userID", "brokerName", "userClientId", "userClientSecret", "userRedirectURI"])
+            const validateUserData: Record<string, any> = { ...dataToBeRegistered }
+            validateUserDetails(validateUserData, ["userID", "brokerName", "userClientId", "userClientSecret", "userRedirectURI"])
             // Verify Jwt token 
             const { newToken } = this.token.verifyAndRefreshToken(token);
             //-------------
@@ -136,10 +135,4 @@ export class UserServices implements IUserServices {
         }
     }
 
-    private validateUserDetails(userDetails: Record<string, any>, requiredFields: Array<string>) {
-        requiredFields.map((requiredField) => {
-            if (!userDetails[requiredField])
-                throw new InvalidUserDetailError(`${requiredField} is required`, BAD_REQUEST_CODE, "BAD REQUEST");
-        })
-    }
 }
