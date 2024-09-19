@@ -51,6 +51,7 @@ class DatabaseServices implements IStorage {
             // await this.createTableIfNotExist();
             console.log('Connected to the database successfully.');
         } catch (err) {
+            console.log(err);
             throw new DatabaseError("Internal Server Error", INTERNAL_SERVER_CODE, "Could not connect to the DB");
         }
     }

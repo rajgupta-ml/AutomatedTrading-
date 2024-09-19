@@ -9,7 +9,6 @@ import { UnknownError } from "../errors/Unknown.error";
 import DatabaseServices from "./DatabaseHandler.services";
 import { CipherError } from "../errors/Cipher.error";
 import { JsonWebTokenError } from "jsonwebtoken";
-import { UnauthorizedUser } from "../errors/UnauthorizedUser.error";
 import { BAD_REQUEST_CODE, SUCCESSFULL_CODE } from "../statusCode/statusCode";
 
 
@@ -76,7 +75,7 @@ export class BrokerService implements IBrokers {
             );
             if (!result.rows[0]) throw new BrokerServiceError("user is not registered with this user", BAD_REQUEST_CODE);
             const { userclientid, userredirecturi, userclientsecret } = await this.decryptData(result.rows[0]);
-            const response  = await this.broker.getAuthenticated().getAccessToken(
+            const response = await this.broker.getAuthenticated().getAccessToken(
                 {
                     clientId: userclientid,
                     clientSecret: userclientsecret,
@@ -84,7 +83,7 @@ export class BrokerService implements IBrokers {
                     redirectURI: userredirecturi
                 });
 
-            return new Response(200, "getAccessToken", "Access token generated successfully", undefined, { ...(newToken ? { token: newToken } : {}),  access_token : response.access_token })
+            return new Response(200, "getAccessToken", "Access token generated successfully", undefined, { ...(newToken ? { token: newToken } : {}), access_token: response.access_token })
         } catch (error) {
             if (error instanceof CipherError) {
                 console.error(error);
