@@ -5,7 +5,7 @@ export interface IAuthController {
     userLogin(request: express.Request, response: express.Response, next: express.NextFunction): Promise<void>
     brokerRegistration(request: express.Request, response: express.Response, next: express.NextFunction): Promise<void>
     getOAuthURI(request: express.Request, response: express.Response, next: express.NextFunction): Promise<void>
-
+    getAccessToken(request: express.Request, response: express.Response, next: express.NextFunction): Promise<void>
 }
 
 export interface userRegistrationDetail {

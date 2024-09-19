@@ -8,7 +8,8 @@ describe('UpstoxAuthentication', () => {
 	let upstoxAuth: UpstoxAuthentication;
 
 	beforeEach(() => {
-		upstoxAuth = new UpstoxAuthentication();
+		const httpClient = new HttpClient()
+		upstoxAuth = new UpstoxAuthentication(httpClient);
 		jest.clearAllMocks();
 	});
 

@@ -3,7 +3,6 @@
 import express, { NextFunction } from "express";
 import { UserServices } from "../services/UserHandler.services";
 import { IAuthController, IUserLogin, userRegistrationDetail } from "../interfaces/IAuthController";
-import { IResponseHandler } from "../interfaces/IResponseHandler";
 import { UnauthorizedUser } from "../errors/UnauthorizedUser.error";
 import { IDataToBeRegistered } from "../interfaces/IDataToBeRegistered";
 import { responseHandlerForSuccess } from "../response/successHandler.response";
@@ -87,6 +86,7 @@ export class AuthController implements IAuthController {
             if (!token) throw new UnauthorizedUser("Unauthorized User");
             validateUserDetails(request.body, ["userID", "code", "brokerName"]);
             const brokerInstance = this.brokerSelector.getBroker(request.body.brokerName);
+            this.brokerServices.setBrokerInstance(brokerInstance);
             const result = await this.brokerServices.getAccessToken(request.body, token);
             return responseHandlerForSuccess(response, result);
         } catch (error) {

@@ -1,3 +1,5 @@
+import { WebSocket } from "ws";
+
 export interface IUpstoxGetOAuthURI {
 	clientId: string;
 	redirectURI: string;
@@ -12,13 +14,33 @@ export interface IUpstoxGetAccessToken {
 
 export interface IUpstoxServices {
 	getAuthenticated(): IAuthentication;
+	getUserDetails(): IUserDetails;
+	getMarketData(access_token: string): Promise<WebSocket>
 }
 
+export interface IGetMarketUriResponse {
+	status?: string;
+	data: {
+		authorized_redirect_uri: string,
+		authorizedRedirectUri: string
+	}
+}
+
+export interface IUpstoxWebsocket {
+	getMarketFeedURI(access_token: string): Promise<IGetMarketUriResponse>
+	connectToUpstoxWithWs(wsURI: string, access_token: string): Promise<WebSocket>
+}
 
 //This types can be combined with other broker params requirement.
 export interface IAuthentication {
 	getOAuthURI(params: IUpstoxGetOAuthURI): URL
 	getAccessToken(params: IUpstoxGetAccessToken): Promise<IUpstoxResponse>
+}
+
+
+export interface IUserDetails {
+	getProfileDetails(access_token: string): Promise<any>;
+	getFundAndMargin(access_token: string): Promise<any>;
 }
 
 
@@ -35,6 +57,21 @@ export interface IUpstoxResponse {
 	is_active: boolean,
 	access_token: string,
 	extended_token?: string
-  
+
 }
 
+export interface IUpstoxGetProfileDetailsResponse {
+
+	status: string,
+	data: {
+		equity: {
+			used_margin: number,
+			payin_amount: number,
+			span_margin: number,
+			adhoc_margin: number,
+			notional_cash: number,
+			available_margin: number,
+			exposure_margin: number
+		}
+	}
+}
