@@ -1,4 +1,3 @@
-import { WebSocket } from "ws";
 
 export interface IUpstoxGetOAuthURI {
 	clientId: string;
@@ -15,21 +14,8 @@ export interface IUpstoxGetAccessToken {
 export interface IUpstoxServices {
 	getAuthenticated(): IAuthentication;
 	getUserDetails(): IUserDetails;
-	getMarketData(access_token: string): Promise<WebSocket>
 }
 
-export interface IGetMarketUriResponse {
-	status?: string;
-	data: {
-		authorized_redirect_uri: string,
-		authorizedRedirectUri: string
-	}
-}
-
-export interface IUpstoxWebsocket {
-	getMarketFeedURI(access_token: string): Promise<IGetMarketUriResponse>
-	connectToUpstoxWithWs(wsURI: string, access_token: string): Promise<WebSocket>
-}
 
 //This types can be combined with other broker params requirement.
 export interface IAuthentication {
