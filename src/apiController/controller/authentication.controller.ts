@@ -9,6 +9,8 @@ import { responseHandlerForSuccess } from "../response/successHandler.response";
 import { BrokerService } from "../services/BrokerHandler.services";
 import { BrokerSelector } from "../services/brokerSelector.service";
 import { validateUserDetails } from "../helpers/dataValidation.helper";
+import { IMicroServiceCaller } from "../interfaces/IMicroServiceCaller.interface";
+import { responseHandlerForError } from "../response/errorHandler.response";
 
 
 
@@ -17,11 +19,12 @@ export class AuthController implements IAuthController {
     private userServices: UserServices;
     private brokerServices: BrokerService;
     private brokerSelector: BrokerSelector;
-
-    constructor(userServices: UserServices, brokerServices: BrokerService, brokerSelector: BrokerSelector) {
+    private microServiceCaller: IMicroServiceCaller
+    constructor(userServices: UserServices, brokerServices: BrokerService, brokerSelector: BrokerSelector, microServiceCaller: IMicroServiceCaller) {
         this.userServices = userServices
         this.brokerServices = brokerServices
         this.brokerSelector = brokerSelector
+        this.microServiceCaller = microServiceCaller;
     }
 
     async userRegister(request: express.Request, response: express.Response, next: express.NextFunction): Promise<void> {
@@ -89,6 +92,20 @@ export class AuthController implements IAuthController {
             this.brokerServices.setBrokerInstance(brokerInstance);
             const result = await this.brokerServices.getAccessToken(request.body, token);
             return responseHandlerForSuccess(response, result);
+        } catch (error) {
+            next(error)
+        }
+    }
+
+
+    async startDataDigestion(request: express.Request, response: express.Response, next: express.NextFunction) {
+
+        try {
+            const token = request.cookies["set-cookie"];
+            if (!token) throw new UnauthorizedUser("UnAuthorized User");
+            validateUserDetails(request.body, ["access_token", "password"]);
+            const result = await this.microServiceCaller.startDataDigestion(request.body.access_token);
+            return responseHandlerForSuccess(response, result)
         } catch (error) {
             next(error)
         }
